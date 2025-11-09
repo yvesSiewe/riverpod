@@ -9,6 +9,10 @@ void main() {
 }
 final counterProvider = StateProvider<int>((ref) => 0);
 final themeDataProvider = StateProvider<bool>((ref) => false);
+final nameProvider = Provider<String>((ref)=> 'Yves');
+final lastnameProvider = Provider<String>((ref)=> 'Roland');
+// definition de l'etat qui ecoute
+final listProvider = StateProvider<List<String>>((ref)=>[]);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -32,13 +36,16 @@ class MyHomePage extends ConsumerWidget {
     
     final counter = ref.watch(counterProvider);
     final themeData = ref.watch(themeDataProvider);
+    final name = ref.watch(nameProvider);
+    final listTodo = ref.watch(listProvider);
+    TextEditingController searchControler = TextEditingController();
 
     return Scaffold(
       backgroundColor: themeData? Colors.white : Colors.black,
       appBar: AppBar(
         backgroundColor: themeData? Colors.white : Colors.black,
         title: Text(
-          'riverpodTest',
+          'riverpodTest $name',
           style: TextStyle(
             color: themeData? Colors.black: Colors.white
           ),
@@ -81,6 +88,44 @@ class MyHomePage extends ConsumerWidget {
                   )
                 ],
               ),
+            ),
+                Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        child: SearchBar(
+                          controller: searchControler,
+                          hintText: 'Add a task',
+                        ),
+                      ),
+                      Expanded(child: IconButton(
+                          onPressed: (){
+                            ref.read(listProvider.notifier).state = [
+                              searchControler.text,
+                              ...ref.read(listProvider),
+                            ];
+                          },
+                          icon: Icon(Icons.add)
+                        )
+                      )
+                    ],
+                  ),
+                ),
+            Expanded(
+              child: listTodo.isEmpty?
+                 Center(
+                  child: Text('no element yet'),
+                 ):
+                 ListView.builder(
+                    itemCount: listTodo.length,
+                    itemBuilder:(context, index){
+                      return ListTile(
+                        title: Text(listTodo[index]),
+                        trailing: Icon(Icons.delete, color: Colors.red,),
+                      );
+                    },),
             )
           ],
         ),
